@@ -1,0 +1,7 @@
+com/codereaper/smartcodeassistant/controller/CodeAssistantController.class
+com/codereaper/smartcodeassistant/model/CodeRequest.class
+com/codereaper/smartcodeassistant/service/OllamaService.class
+com/codereaper/smartcodeassistant/config/WebConfig.class
+com/codereaper/smartcodeassistant/SmartCodeAssistantApplication.class
+com/codereaper/smartcodeassistant/SmartCodeAssistantApplication$1.class
+com/codereaper/smartcodeassistant/model/CodeResponse.class
