@@ -1,7 +1,8 @@
 <template>
   <div class="smart-code-assistant">
-    <h1>{{ title }}</h1>
-    <div class="assistant-container">
+    <!-- Fixed Header Section -->
+    <div class="header-section">
+      <h1>{{ title }}</h1>
       <div class="description">
         <h2>About Smart Code Assistant</h2>
         <p>
@@ -10,45 +11,49 @@
           Ollama Qwen2.5 Coder LLM.
         </p>
       </div>
+    </div>
 
-      <!-- Chat History Section -->
-      <div class="chat-history" ref="chatHistory">
-        <div
-          v-for="(message, index) in chatHistory"
-          :key="index"
-          class="chat-message"
-          :class="message.sender"
-        >
-          <div class="message-header">
-            <strong>{{
-              message.sender === "user" ? "You" : "Smart Code Assistant"
-            }}</strong>
-            <span class="message-time">{{
-              formatTime(message.timestamp)
-            }}</span>
+    <div class="main-container">
+      <!-- Scrollable Chat Section -->
+      <div class="chat-container">
+        <div class="chat-history" ref="chatHistory">
+          <div
+            v-for="(message, index) in chatHistory"
+            :key="index"
+            class="chat-message"
+            :class="message.sender"
+          >
+            <div class="message-header">
+              <strong>{{
+                message.sender === "user" ? "You" : "Smart Code Assistant"
+              }}</strong>
+              <span class="message-time">{{
+                formatTime(message.timestamp)
+              }}</span>
+            </div>
+            <div class="message-content">
+              <pre v-if="message.sender === 'assistant'">{{
+                message.content
+              }}</pre>
+              <p v-else>{{ message.content }}</p>
+            </div>
           </div>
-          <div class="message-content">
-            <pre v-if="message.sender === 'assistant'">{{
-              message.content
-            }}</pre>
-            <p v-else>{{ message.content }}</p>
-          </div>
+        </div>
+
+        <div class="loading-section" v-if="isLoading">
+          <div class="loading-spinner"></div>
+          <p>Please wait while Qwen2.5 Coder processes your request</p>
+        </div>
+
+        <div class="error-section" v-if="error">
+          <h2>Error</h2>
+          <div class="error-message">{{ error }}</div>
+          <button @click="resetError" class="reset-button">Try Again</button>
         </div>
       </div>
 
-      <div class="loading-section" v-if="isLoading">
-        <div class="loading-spinner"></div>
-        <p>Please wait while Qwen2.5 Coder processes your request</p>
-      </div>
-
-      <div class="error-section" v-if="error">
-        <h2>Error</h2>
-        <div class="error-message">{{ error }}</div>
-        <button @click="resetError" class="reset-button">Try Again</button>
-      </div>
-
-      <!-- Input Section (Always Visible) -->
-      <div class="prompt-section">
+      <!-- Fixed Input Section -->
+      <div class="input-section">
         <textarea
           v-model="userPrompt"
           placeholder="Enter your code question or prompt here..."
@@ -215,35 +220,52 @@ export default {
 
 <style scoped>
 .smart-code-assistant {
-  margin: 20px;
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 40px);
+  height: 100vh;
+  overflow: hidden;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+}
+
+/* Header section styles */
+.header-section {
+  flex-shrink: 0;
+  padding: 20px 20px 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  z-index: 10;
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
+  position: relative;
 }
 
 h1 {
   color: #2c3e50;
   font-size: 2.5em;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 
 h2 {
   color: #42b983;
-  margin-top: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
-.assistant-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+.description {
+  margin-bottom: 20px;
+}
+
+/* Chat container styles */
+.chat-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0 20px;
   background-color: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  flex: 1;
 }
 
 /* Chat history styling */
@@ -251,12 +273,8 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  max-height: 500px;
-  overflow-y: auto;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #fff;
+  padding: 20px 0;
+  overflow-anchor: none;
 }
 
 .chat-message {
@@ -304,10 +322,19 @@ h2 {
   color: #999;
 }
 
+/* Input section styles */
+.input-section {
+  flex-shrink: 0;
+  padding: 15px 20px;
+  background-color: #ffffff;
+  border-top: 1px solid #e0e0e0;
+  z-index: 10;
+}
+
 .prompt-input {
   width: 100%;
   padding: 12px;
-  margin: 10px 0;
+  margin-bottom: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-family: inherit;
@@ -406,12 +433,12 @@ h2 {
 
 /* Mobile Responsive Styles */
 @media (max-width: 600px) {
-  .smart-code-assistant {
-    margin: 10px;
-    min-height: calc(100vh - 20px);
+  .header-section {
+    padding: 10px 10px 0;
   }
 
-  .assistant-container {
+  .chat-container,
+  .input-section {
     padding: 10px;
   }
 
@@ -421,7 +448,7 @@ h2 {
 
   h1 {
     font-size: 1.8em;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
 
   .action-button,
